@@ -19,11 +19,11 @@ const firebaseConfig = {
 const firebase = require('firebase')
 firebase.initializeApp(firebaseConfig)
 
+const db = admin.firestore()
+
 // GET scream
 app.get('/screams', (req, res) => {
-  admin
-    .firestore()
-    .collection('screams')
+  db.collection('screams')
     // orders the get request by latests first
     .orderBy('createdAt', 'desc')
     .get()
@@ -56,9 +56,7 @@ app.post('/scream', (req, res) => {
     createdAt: new Date().toISOString()
   }
 
-  admin
-    .firestore()
-    .collection('screams')
+  db.collection('screams')
     .add(newScream)
     .then(doc => {
       res.json({ message: `document ${doc.id} has been created succesfully` })
@@ -80,17 +78,26 @@ app.post('/signup', (req, res) => {
 
   //TODO: data validation
 
-  firebase
-    .auth()
-    .createUserWithEmailAndPassword(newUser.email, newUser.password)
-    .then(data => {
-      return res
-        .status(201)
-        .json({ message: `user ${data.user.uid} has signed up successfully` })
-    })
-    .catch(err => {
-      console.error(err)
-      return res.status(500).json({ error: err.code })
+  db.doc(`/user/${newUser.handle}`)
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        return res.status(400).json({ handle: 'this handle is already taken' })
+      } else {
+        return firebase
+          .auth()
+          .createUserWithEmailAndPassword(newUser.email, newUser.password)
+          .then(data => {
+            return data.user.getIdToken()
+          })
+          .then(token => {
+            return res.status(201).json({ token })
+          })
+          .catch(err => {
+            console.error(err)
+            return res.status(500).json({ error: err.code })
+          })
+      }
     })
 })
 
