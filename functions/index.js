@@ -78,7 +78,8 @@ app.post('/signup', (req, res) => {
 
   //TODO: data validation
 
-  db.doc(`/user/${newUser.handle}`)
+  let token, userId
+  db.doc(`/users/${newUser.userHandle}`)
     .get()
     .then(doc => {
       if (doc.exists) {
@@ -87,20 +88,31 @@ app.post('/signup', (req, res) => {
         return firebase
           .auth()
           .createUserWithEmailAndPassword(newUser.email, newUser.password)
-          .then(data => {
-            return data.user.getIdToken()
-          })
-          .then(token => {
-            return res.status(201).json({ token })
-          })
-          .catch(err => {
-            console.error(err)
-            if (err.code == 'auth/email-already-in-use') {
-              return res.status(400).json({ email: 'email is already in use' })
-            } else {
-              return res.status(500).json({ error: err.code })
-            }
-          })
+      }
+    })
+    .then(data => {
+      userId = data.user.uid
+      return data.user.getIdToken()
+    })
+    .then(idToken => {
+      token = idToken
+      const userCredentials = {
+        userHandle: newUser.userHandle,
+        email: newUser.email,
+        createdAt: new Date().toISOString(),
+        userId
+      }
+      return db.doc(`/users/${newUser.userHandle}`).set(userCredentials)
+    })
+    .then(() => {
+      return res.status(201).json({ token })
+    })
+    .catch(err => {
+      console.error(err)
+      if (err.code == 'auth/email-already-in-use') {
+        return res.status(400).json({ email: 'email is already in use' })
+      } else {
+        return res.status(500).json({ error: err.code })
       }
     })
 })
