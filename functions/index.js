@@ -55,4 +55,4 @@ app.post('/scream', (req, res) => {
 })
 
 // automatically turns into routes with /api/
-exports.api = functions.https.onRequest(app)
+exports.api = functions.region('europe-west').https.onRequest(app)
