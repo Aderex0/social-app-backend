@@ -1,10 +1,23 @@
+const express = require('express')
+const app = express()
+admin.initializeApp()
+
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 
-admin.initializeApp()
+const firebaseConfig = {
+  apiKey: 'AIzaSyAuX277hjNb6lLCAifqlOwLwDttsQLe6_k',
+  authDomain: 'educational-social-app.firebaseapp.com',
+  databaseURL: 'https://educational-social-app.firebaseio.com',
+  projectId: 'educational-social-app',
+  storageBucket: 'educational-social-app.appspot.com',
+  messagingSenderId: '341133056213',
+  appId: '1:341133056213:web:08dea8dc4ef169483aaa5c',
+  measurementId: 'G-RGPVCT5ZZY'
+}
 
-const express = require('express')
-const app = express()
+const firebase = require('firebase')
+firebase.initializeApp(firebaseConfig)
 
 app.get('/screams', (req, res) => {
   admin
