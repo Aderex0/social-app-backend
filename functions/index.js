@@ -1,9 +1,9 @@
 const express = require('express')
 const app = express()
-admin.initializeApp()
 
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
+admin.initializeApp()
 
 const firebaseConfig = {
   apiKey: 'AIzaSyAuX277hjNb6lLCAifqlOwLwDttsQLe6_k',
@@ -19,6 +19,7 @@ const firebaseConfig = {
 const firebase = require('firebase')
 firebase.initializeApp(firebaseConfig)
 
+// GET scream
 app.get('/screams', (req, res) => {
   admin
     .firestore()
@@ -41,6 +42,7 @@ app.get('/screams', (req, res) => {
     .catch(err => console.error(err))
 })
 
+//POST scream
 app.post('/scream', (req, res) => {
   // return an error if request is not POST
   if (req.method !== 'POST') {
@@ -67,5 +69,30 @@ app.post('/scream', (req, res) => {
     })
 })
 
+//POST signup
+app.post('/signup', (req, res) => {
+  const newUser = {
+    email: req.body.email,
+    password: req.body.password,
+    confirmPassword: req.body.confirmPassword,
+    userHandle: req.body.userHandle
+  }
+
+  //TODO: data validation
+
+  firebase
+    .auth()
+    .createUserWithEmailAndPassword(newUser.email, newUser.password)
+    .then(data => {
+      return res
+        .status(201)
+        .json({ message: `user ${data.user.uid} has signed up successfully` })
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code })
+    })
+})
+
 // automatically turns into routes with /api/
-exports.api = functions.region('europe-west').https.onRequest(app)
+exports.api = functions.region('europe-west1').https.onRequest(app)
