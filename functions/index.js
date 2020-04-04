@@ -28,7 +28,7 @@ app.get('/screams', (req, res) => {
     .catch(err => console.error(err))
 })
 
-app.post('/screams', (req, res) => {
+app.post('/scream', (req, res) => {
   // return an error if request is not POST
   if (req.method !== 'POST') {
     return res.status(400).json({ error: 'Method not allowed' })
@@ -38,7 +38,7 @@ app.post('/screams', (req, res) => {
   const newScream = {
     body: req.body.body,
     userHandle: req.body.userHandle,
-    createdAt: new Date().toISOString
+    createdAt: new Date().toISOString()
   }
 
   admin
