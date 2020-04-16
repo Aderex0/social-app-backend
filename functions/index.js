@@ -179,10 +179,12 @@ app.post('/login', (req, res) => {
         return res
           .status(403)
           .json({ general: 'wrong credentials please try again' })
+      } else {
+        return res.status(500).json({ error: err.code })
       }
-      return res.status(400).json(error.code)
     })
 })
 
 // automatically turns into routes with /api/
+// also changes .region
 exports.api = functions.region('europe-west1').https.onRequest(app)
