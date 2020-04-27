@@ -1,4 +1,4 @@
-const admin = require('./admin')
+const { admin, db } = require('./admin')
 
 //Middleware to confirm that scream is being posted by correct user
 exports.FBAuth = (req, res, next) => {
@@ -20,7 +20,6 @@ exports.FBAuth = (req, res, next) => {
     .verifyIdToken(idToken)
     .then(decodedToken => {
       req.user = decodedToken
-      console.log(decodedToken)
       return db
         .collection('users')
         .where('userId', '==', req.user.uid)
