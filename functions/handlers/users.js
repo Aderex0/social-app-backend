@@ -5,6 +5,14 @@ const { validateSignupData, validateLoginData } = require('../util/validators')
 const firebase = require('firebase')
 firebase.initializeApp(config)
 
+/* 
+  Route Contents
+  1. SIGNUP NEW USER
+  2. LOGIN USER
+  3. UPLOAD USER IMAGE
+*/
+
+// 1. SIGNUP NEW USER
 exports.signup = (req, res) => {
   const newUser = {
     email: req.body.email,
@@ -55,6 +63,7 @@ exports.signup = (req, res) => {
     })
 }
 
+// 2. LOGIN USER
 exports.login = (req, res) => {
   const user = {
     email: req.body.email,
@@ -88,3 +97,6 @@ exports.login = (req, res) => {
       }
     })
 }
+
+// 3. UPLOAD USER IMAGE
+exports.uploadImage = (req, res) => {}
