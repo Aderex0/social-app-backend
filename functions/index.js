@@ -13,7 +13,7 @@ app.post('/scream', FBAuth, postScream)
 // User routes
 app.post('/signup', signup)
 app.post('/login', login)
-app.post('/user/image', uploadImage)
+app.post('/user/image', FBAuth, uploadImage)
 
 // automatically turns into routes with /api/
 // also changes .region
