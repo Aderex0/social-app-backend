@@ -8,3 +8,5 @@ exports.config = {
   appId: '1:341133056213:web:2b2ec01ef037492b3aaa5c',
   measurementId: 'G-11SQ1GT8VL'
 }
+
+// export GOOGLE_APPLICATION_CREDENTIALS="/Users/barborakadlcikova/Downloads/key.json"
