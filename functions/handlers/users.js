@@ -1,6 +1,10 @@
 const { config } = require('../util/config')
 const { admin, db } = require('../util/admin')
-const { validateSignupData, validateLoginData } = require('../util/validators')
+const {
+  validateSignupData,
+  validateLoginData,
+  reduceUserDetails
+} = require('../util/validators')
 
 const firebase = require('firebase')
 firebase.initializeApp(config)
@@ -9,7 +13,9 @@ firebase.initializeApp(config)
   Route Contents
   1. SIGNUP NEW USER
   2. LOGIN USER
-  3. UPLOAD USER IMAGE
+  3. ADD USER DETAILS
+  4. GET USER DETAILS
+  5. UPLOAD USER IMAGE
 */
 
 // 1. SIGNUP NEW USER
@@ -101,7 +107,51 @@ exports.login = (req, res) => {
     })
 }
 
-// 3. UPLOAD USER IMAGE
+// 3. ADD USER DETAILS
+exports.addUserDetails = (req, res) => {
+  let userDetails = reduceUserDetails(req.body)
+
+  db.doc(`/users/${req.user.userHandle}`)
+    .update(userDetails)
+    .then(() => {
+      return res.json({ message: 'details added succesfully' })
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code })
+    })
+}
+
+// 4. GET USER DETAILS
+
+exports.getAuthenticatedUser = (req, res) => {
+  let userData = {}
+
+  db.doc(`/users/${req.user.userHandle}`)
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        userData.credentials = doc.data()
+        return db
+          .collection('likes')
+          .where('userHandle', '==', req.user.userHandle)
+          .get()
+      }
+    })
+    .then(data => {
+      userData.likes = []
+      data.forEach(doc => {
+        userData.likes.push(doc.data())
+      })
+      return res.json(userData)
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code })
+    })
+}
+
+// 5. UPLOAD USER IMAGE
 exports.uploadImage = (req, res) => {
   const BusBoy = require('busboy')
   const path = require('path')
