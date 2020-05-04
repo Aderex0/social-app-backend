@@ -1,5 +1,13 @@
 const { db } = require('../util/admin')
 
+/*
+  Scream Routes:
+  1. GET ALL SCREAMS
+  2. GET SCREAM
+  3. POST SCREAM
+*/
+
+// 1. GET ALL SCREAMS
 exports.getScreams = (req, res) => {
   db.collection('screams')
     // orders the get request by latests first
@@ -23,6 +31,38 @@ exports.getScreams = (req, res) => {
     })
 }
 
+// 2. GET SCREAM
+exports.getScream = (req, res) => {
+  let screamData = {}
+
+  db.doc(`/screams/${req.params.screamId}`)
+    .get()
+    .then(doc => {
+      if (!doc.exists) {
+        return res.status(404).json({ error: 'Scream not found' })
+      }
+      screamData = doc.data()
+      screamData.screamId = doc.id
+      return db
+        .collection('comments')
+        .orderBy('createdAt', 'desc')
+        .where('screamId', '==', req.params.screamId)
+        .get()
+    })
+    .then(data => {
+      screamData.comments = []
+      data.forEach(doc => {
+        screamData.comments.push(doc.data())
+      })
+      return res.json(screamData)
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code })
+    })
+}
+
+// 3. POST SCREAM
 exports.postScream = (req, res) => {
   // return an error if request is not POST
   if (req.method !== 'POST') {
