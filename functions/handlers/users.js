@@ -1,6 +1,10 @@
 const { config } = require('../util/config')
 const { admin, db } = require('../util/admin')
-const { validateSignupData, validateLoginData } = require('../util/validators')
+const {
+  validateSignupData,
+  validateLoginData,
+  reduceUserDetails
+} = require('../util/validators')
 
 const firebase = require('firebase')
 firebase.initializeApp(config)
@@ -9,7 +13,8 @@ firebase.initializeApp(config)
   Route Contents
   1. SIGNUP NEW USER
   2. LOGIN USER
-  3. UPLOAD USER IMAGE
+  3. ADD USER DETAILS
+  4. UPLOAD USER IMAGE
 */
 
 // 1. SIGNUP NEW USER
@@ -101,7 +106,12 @@ exports.login = (req, res) => {
     })
 }
 
-// 3. UPLOAD USER IMAGE
+// 3. ADD USER DETAILS
+exports.addUserDetails = (req, res) => {
+  let userDetails = reduceUserDetails(req.body)
+}
+
+// 4. UPLOAD USER IMAGE
 exports.uploadImage = (req, res) => {
   const BusBoy = require('busboy')
   const path = require('path')
