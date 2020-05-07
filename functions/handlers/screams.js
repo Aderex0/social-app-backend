@@ -4,7 +4,8 @@ const { db } = require('../util/admin')
   Scream Routes:
   1. GET ALL SCREAMS
   2. GET SCREAM
-  3. POST SCREAM
+  3. POST SCREAMS
+  4. POST SCREAM COMMENT
 */
 
 // 1. GET ALL SCREAMS
@@ -86,5 +87,40 @@ exports.postScream = (req, res) => {
     .catch(err => {
       console.error(err)
       return res.status(500).json({ error: 'something went wrong' })
+    })
+}
+
+// 4. POST SCREAM COMMENT
+
+exports.postScreamComment = (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(400).json({ error: 'Method not allowed' })
+  }
+
+  if (req.body.body.trim() === '')
+    return res.status(400).json({ error: 'Must not be empty' })
+
+  const newComment = {
+    body: req.body.body,
+    userHandle: req.user.userHandle,
+    createdAt: new Date().toISOString(),
+    screamId: req.params.screamId,
+    userImage: req.user.imageUrl
+  }
+
+  db.doc(`/screams/${req.params.screamId}`)
+    .get()
+    .then(doc => {
+      if (!doc.exists) {
+        return res.status(404).json({ error: 'Scream not found' })
+      }
+      return db.collection('comments').add(newComment)
+    })
+    .then(() => {
+      return res.json(newComment)
+    })
+    .catch(err => {
+      console.log(err)
+      return res.status(500).json({ error: 'Something went wrong' })
     })
 }
