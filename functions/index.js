@@ -1,5 +1,5 @@
 const app = require('express')()
-const db = require('./util/admin')
+const { db } = require('./util/admin')
 const functions = require('firebase-functions')
 
 const {
@@ -48,12 +48,12 @@ exports.createNotificationOnLike = functions
       .get()
       .then(doc => {
         if (doc.exists) {
-          return db.doc(`notifications/${snapshot.id}`).set({
+          return db.doc(`/notifications/${snapshot.id}`).set({
             recipient: doc.data().userHandle,
             sender: snapshot.data().userHandle,
-            type: `like`,
+            type: 'like',
             read: false,
-            createdAt: new Date().toISOString,
+            createdAt: new Date().toISOString(),
             screamId: doc.id
           })
         }
@@ -67,6 +67,21 @@ exports.createNotificationOnLike = functions
       })
   })
 
+exports.deleteNotificationOnUnlike = functions
+  .region('europe-west1')
+  .firestore.document('/likes/{id}')
+  .onDelete(snapshot => {
+    db.doc(`/notifications/${snapshot.id}`)
+      .delete()
+      .then(() => {
+        return
+      })
+      .catch(err => {
+        console.log(err)
+        return
+      })
+  })
+
 exports.createNotificationOnComment = functions
   .region('europe-west1')
   .firestore.document('comments/{id}')
@@ -75,12 +90,12 @@ exports.createNotificationOnComment = functions
       .get()
       .then(doc => {
         if (doc.exists) {
-          return db.doc(`notifications/${snapshot.id}`).set({
+          return db.doc(`/notifications/${snapshot.id}`).set({
             recipient: doc.data().userHandle,
             sender: snapshot.data().userHandle,
-            type: `comment`,
+            type: 'comment',
             read: false,
-            createdAt: new Date().toISOString,
+            createdAt: new Date().toISOString(),
             screamId: doc.id
           })
         }
