@@ -8,6 +8,7 @@ const { db } = require('../util/admin')
   4. POST SCREAM COMMENT
   5. LIKE SCREAM
   6. UNLIKE SCREAM
+  7. DELETE SCREAM
 */
 
 // 1. GET ALL SCREAMS
@@ -119,6 +120,9 @@ exports.postScreamComment = (req, res) => {
       if (!doc.exists) {
         return res.status(404).json({ error: 'Scream not found' })
       }
+      return doc.ref.update({ commentCount: doc.data().commentCount + 1 })
+    })
+    .then(() => {
       return db.collection('comments').add(newComment)
     })
     .then(() => {
@@ -208,7 +212,7 @@ exports.unlikeScream = (req, res) => {
         return res.status(400).json({ error: 'Scream not liked' })
       } else {
         return db
-          .doc(`/likes/${data.docs[0].data().id}`)
+          .doc(`/likes/${data.docs[0].id}`)
           .delete()
           .then(() => {
             screamData.likeCount--
@@ -220,5 +224,32 @@ exports.unlikeScream = (req, res) => {
     .catch(err => {
       console.error(err)
       res.status(500).json({ error: err.code })
+    })
+}
+
+// 7. DELETE SCREAM
+
+exports.deleteScream = (req, res) => {
+  const document = db.doc(`/screams/${req.params.screamId}`)
+
+  document
+    .get()
+    .then(doc => {
+      if (!doc.exists) {
+        return res.status(404).json({ error: 'Scream not found' })
+      }
+
+      if (doc.data().userHandle !== req.user.userHandle) {
+        return res.status(403).json({ error: 'Unauthorized' })
+      } else {
+        return document.delete()
+      }
+    })
+    .then(() => {
+      res.json({ message: 'scream deleted succesfully' })
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code })
     })
 }
