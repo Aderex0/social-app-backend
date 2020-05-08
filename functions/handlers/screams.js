@@ -232,13 +232,6 @@ exports.unlikeScream = (req, res) => {
 exports.deleteScream = (req, res) => {
   const document = db.doc(`/screams/${req.params.screamId}`)
 
-  const allScreamLikes = db
-    .collection('likes')
-    .where('screamId', '==', `${req.params.screamId}`)
-    .get()
-
-  console.log(allScreamLikes)
-
   document
     .get()
     .then(doc => {
@@ -252,9 +245,16 @@ exports.deleteScream = (req, res) => {
         return document.delete()
       }
     })
-    // .then(() => {
-    //   return allScreamLikes.delete()
-    // })
+    .then(() => {
+      db.collection('likes')
+        .where('screamId', '==', req.params.screamId)
+        .get()
+        .then(data => {
+          data.forEach(doc => {
+            db.doc(`/likes/${doc.id}`).delete()
+          })
+        })
+    })
     .then(() => {
       res.json({ message: 'scream deleted succesfully' })
     })
