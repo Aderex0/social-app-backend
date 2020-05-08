@@ -246,6 +246,16 @@ exports.deleteScream = (req, res) => {
       }
     })
     .then(() => {
+      db.collection('likes')
+        .where('screamId', '==', req.params.screamId)
+        .get()
+        .then(data => {
+          data.forEach(doc => {
+            db.doc(`/likes/${doc.id}`).delete()
+          })
+        })
+    })
+    .then(() => {
       res.json({ message: 'scream deleted succesfully' })
     })
     .catch(err => {
