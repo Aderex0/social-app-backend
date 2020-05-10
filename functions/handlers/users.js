@@ -15,7 +15,8 @@ firebase.initializeApp(config)
   2. LOGIN USER
   3. ADD USER DETAILS
   4. GET USER DETAILS
-  5. UPLOAD USER IMAGE
+  5. GET OTHER USER DETAILS
+  6. UPLOAD USER IMAGE
 */
 
 // 1. SIGNUP NEW USER
@@ -143,6 +144,26 @@ exports.getAuthenticatedUser = (req, res) => {
       data.forEach(doc => {
         userData.likes.push(doc.data())
       })
+      return db
+        .collection('notifications')
+        .where('recipient', '==', req.user.userHandle)
+        .orderBy('createdAt', 'desc')
+        .limit(10)
+        .get()
+    })
+    .then(data => {
+      userData.notifications = []
+      data.forEach(doc => {
+        userData.notifications.push({
+          recipient: doc.data().recipient,
+          sender: doc.data().sender,
+          createdAt: doc.data().createdAt,
+          screamId: doc.data().screamId,
+          type: doc.data().type,
+          read: doc.data().read,
+          notificationId: doc.id
+        })
+      })
       return res.json(userData)
     })
     .catch(err => {
@@ -151,7 +172,45 @@ exports.getAuthenticatedUser = (req, res) => {
     })
 }
 
-// 5. UPLOAD USER IMAGE
+// 5. GET OTHER USER DETAILS
+
+exports.getUserDetails = (req, res) => {
+  let userData = {}
+
+  db.doc(`/users/${req.params.userHandle}`)
+    .get()
+    .then(doc => {
+      if (doc.exists) {
+        userData.user = doc.data()
+        return db
+          .collection('screams')
+          .where('userHandle', '==', req.params.userHandle)
+          .orderBy('createdAt', 'desc')
+          .get()
+      } else res.status(404).json({ error: 'User not found' })
+    })
+    .then(data => {
+      userData.screams = []
+      data.forEach(doc => {
+        userData.screams.push({
+          body: doc.data().body,
+          createdAt: doc.data().createdAt,
+          userHandle: doc.data().userHandle,
+          userImage: doc.data().userImage,
+          likeCount: doc.data().likeCount,
+          commentCount: doc.data().commentCount,
+          screamId: doc.id
+        })
+      })
+      return res.json(userData)
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code })
+    })
+}
+
+// 6. UPLOAD USER IMAGE
 exports.uploadImage = (req, res) => {
   const BusBoy = require('busboy')
   const path = require('path')
