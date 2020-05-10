@@ -48,10 +48,14 @@ exports.createNotificationOnLike = functions
   .region('europe-west1')
   .firestore.document('likes/{id}')
   .onCreate(snapshot => {
-    db.doc(`/screams/${snapshot.data().screamId}`)
+    return db
+      .doc(`/screams/${snapshot.data().screamId}`)
       .get()
       .then(doc => {
-        if (doc.exists) {
+        if (
+          doc.exists &&
+          doc.data().userHandle !== nspashot.data().userHandle
+        ) {
           return db.doc(`/notifications/${snapshot.id}`).set({
             recipient: doc.data().userHandle,
             sender: snapshot.data().userHandle,
@@ -61,9 +65,6 @@ exports.createNotificationOnLike = functions
             screamId: doc.id
           })
         }
-      })
-      .then(() => {
-        return
       })
       .catch(err => {
         console.error(err)
@@ -75,14 +76,11 @@ exports.deleteNotificationOnUnlike = functions
   .region('europe-west1')
   .firestore.document('/likes/{id}')
   .onDelete(snapshot => {
-    db.doc(`/notifications/${snapshot.id}`)
+    return db
+      .doc(`/notifications/${snapshot.id}`)
       .delete()
-      .then(() => {
-        return
-      })
       .catch(err => {
         console.log(err)
-        return
       })
   })
 
@@ -90,10 +88,14 @@ exports.createNotificationOnComment = functions
   .region('europe-west1')
   .firestore.document('comments/{id}')
   .onCreate(snapshot => {
-    db.doc(`/screams/${snapshot.data().screamId}`)
+    return db
+      .doc(`/screams/${snapshot.data().screamId}`)
       .get()
       .then(doc => {
-        if (doc.exists) {
+        if (
+          doc.exists &&
+          doc.data().userHandle !== nspashot.data().userHandle
+        ) {
           return db.doc(`/notifications/${snapshot.id}`).set({
             recipient: doc.data().userHandle,
             sender: snapshot.data().userHandle,
@@ -104,11 +106,7 @@ exports.createNotificationOnComment = functions
           })
         }
       })
-      .then(() => {
-        return
-      })
       .catch(err => {
         console.error(err)
-        return
       })
   })
