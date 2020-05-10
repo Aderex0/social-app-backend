@@ -16,7 +16,8 @@ const {
   login,
   uploadImage,
   addUserDetails,
-  getAuthenticatedUser
+  getAuthenticatedUser,
+  getUserDetails
 } = require('./handlers/users')
 const { FBAuth } = require('./util/fbAuth')
 
@@ -35,6 +36,7 @@ app.post('/login', login)
 app.post('/user/image', FBAuth, uploadImage)
 app.post('/user', FBAuth, addUserDetails)
 app.get('/user', FBAuth, getAuthenticatedUser)
+app.get('/user/:userHandle', getUserDetails)
 
 // automatically turns into routes with /api/
 // also changes .region
