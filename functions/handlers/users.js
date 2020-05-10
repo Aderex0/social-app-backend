@@ -17,6 +17,7 @@ firebase.initializeApp(config)
   4. GET USER DETAILS
   5. GET OTHER USER DETAILS
   6. UPLOAD USER IMAGE
+  7. MARK NOTIFICATIONS READ
 */
 
 // 1. SIGNUP NEW USER
@@ -261,4 +262,23 @@ exports.uploadImage = (req, res) => {
       })
   })
   busboy.end(req.rawBody)
+}
+
+// 7. MARK NOTIFICATIONS READ
+
+exports.markNotificationsRead = (req, res) => {
+  let batch = db.batch()
+  req.body.forEach(notificationId => {
+    const notification = db.doc(`/notifications/${notificationId}`)
+    batch.update(notification, { read: true })
+  })
+  batch
+    .commit()
+    .then(() => {
+      return res.json({ message: 'Notifications marked read' })
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code })
+    })
 }
