@@ -24,7 +24,8 @@ exports.getScreams = (req, res) => {
           screamId: doc.id,
           body: doc.data().body,
           userHandle: doc.data().userHandle,
-          createdAt: doc.data().createdAt
+          createdAt: doc.data().createdAt,
+          userImage: doc.data().userImage
         })
       })
       return res.json(screams)
@@ -104,7 +105,7 @@ exports.postScreamComment = (req, res) => {
   }
 
   if (req.body.body.trim() === '')
-    return res.status(400).json({ error: 'Must not be empty' })
+    return res.status(400).json({ comment: 'Must not be empty' })
 
   const newComment = {
     body: req.body.body,
@@ -244,16 +245,6 @@ exports.deleteScream = (req, res) => {
       } else {
         return document.delete()
       }
-    })
-    .then(() => {
-      db.collection('likes')
-        .where('screamId', '==', req.params.screamId)
-        .get()
-        .then(data => {
-          data.forEach(doc => {
-            db.doc(`/likes/${doc.id}`).delete()
-          })
-        })
     })
     .then(() => {
       res.json({ message: 'scream deleted succesfully' })

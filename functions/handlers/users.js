@@ -17,6 +17,7 @@ firebase.initializeApp(config)
   4. GET USER DETAILS
   5. GET OTHER USER DETAILS
   6. UPLOAD USER IMAGE
+  7. MARK NOTIFICATIONS READ
 */
 
 // 1. SIGNUP NEW USER
@@ -68,7 +69,9 @@ exports.signup = (req, res) => {
       if (err.code == 'auth/email-already-in-use') {
         return res.status(400).json({ email: 'email is already in use' })
       } else {
-        return res.status(500).json({ error: err.code })
+        return res
+          .status(500)
+          .json({ general: 'Something went wrong, please try again' })
       }
     })
 }
@@ -261,4 +264,23 @@ exports.uploadImage = (req, res) => {
       })
   })
   busboy.end(req.rawBody)
+}
+
+// 7. MARK NOTIFICATIONS READ
+
+exports.markNotificationsRead = (req, res) => {
+  let batch = db.batch()
+  req.body.forEach(notificationId => {
+    const notification = db.doc(`/notifications/${notificationId}`)
+    batch.update(notification, { read: true })
+  })
+  batch
+    .commit()
+    .then(() => {
+      return res.json({ message: 'Notifications marked read' })
+    })
+    .catch(err => {
+      console.error(err)
+      return res.status(500).json({ error: err.code })
+    })
 }
